@@ -2,15 +2,13 @@
 import { watch, ref, defineAsyncComponent, onMounted, defineEmits } from 'vue'
 import { useNuxtApp } from '#imports'
 
-const emit = defineEmits(['modal:close'])
-
-const { $modal } = useNuxtApp()
-
 const modalContentComponentFilename = ref(null)
 const modalContentComponent = shallowRef(null)
 const isPreset = ref(false)
 const modalContainerClassModifier = ref(null)
 const modalContentComponentProps = ref({})
+
+const { $modal } = useNuxtApp()
 
 onMounted(() => {
   $modal.modalContentComponentFilename = modalContentComponentFilename
@@ -22,7 +20,7 @@ watch(modalContentComponentFilename, (name) => {
 
   if (name === null) {
     modalContentComponent.value = null
-    //window.onscroll = function () {}
+    window.onscroll = function () {}
     return
   }
 
@@ -31,14 +29,14 @@ watch(modalContentComponentFilename, (name) => {
     if (!isPreset.value) {
       const dynamicComponent = defineAsyncComponent( () => import(`@/modals/${name}.vue`))
 
-      //modalContainerClassModifier.value = dynamicComponent.default?.parentClassModifier
+      modalContainerClassModifier.value = dynamicComponent?.parentClassModifier
       modalContentComponent.value = dynamicComponent
 
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop
       const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
 
       window.onscroll = function () {
-        //window.scrollTo(scrollLeft, scrollTop)
+        window.scrollTo(scrollLeft, scrollTop)
       }
     }
   }
@@ -46,6 +44,8 @@ watch(modalContentComponentFilename, (name) => {
     console.error(e)
   }
 })
+
+const emit = defineEmits(['modal:close'])
 
 function onOverlayClick() {
   modalContentComponentFilename.value = null

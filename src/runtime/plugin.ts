@@ -1,14 +1,9 @@
 import { defineNuxtPlugin } from '#app'
 
 class ModalManager {
-  public instance: ({}|null) = null
   public modalContentComponentFilename = null
   public modalContentComponentProps = null
   public isPreset = null
-
-  constructor() {
-    this.instance = null
-  }
 
   #load(name: string, props = {}, isPreset = false) {
 
@@ -16,6 +11,14 @@ class ModalManager {
       //this.instance.resolve = resolve
       //this.instance.reject = reject
     })
+
+    if (
+      this.modalContentComponentFilename === null ||
+      this.modalContentComponentProps === null ||
+      this.isPreset === null
+    ) {
+      throw new Error()
+    }
 
     this.modalContentComponentFilename.value = name
     this.modalContentComponentProps.value = props
