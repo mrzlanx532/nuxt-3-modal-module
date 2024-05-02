@@ -1,19 +1,21 @@
-import { defineNuxtModule, addPlugin, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addPlugin, createResolver, addComponent } from '@nuxt/kit'
 
-// Module options TypeScript interface definition
 export interface ModuleOptions {}
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'my-module',
-    configKey: 'myModule',
+    name: 'nuxt-3-modal-module',
+    configKey: 'modal',
   },
-  // Default configuration options of the Nuxt module
   defaults: {},
-  setup(_options, _nuxt) {
+  async setup(_options, _nuxt) {
     const resolver = createResolver(import.meta.url)
 
-    // Do not add the extension since the `.ts` will be transpiled to `.mjs` after `npm run prepack`
+    await addComponent({
+      name: 'Modal',
+      filePath: resolver.resolve('./runtime/components/Modal.vue'),
+    })
+
     addPlugin(resolver.resolve('./runtime/plugin'))
   },
 })

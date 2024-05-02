@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
   modules: ['../src/module'],
-  myModule: {},
+  modal: {},
   devtools: { enabled: true },
 })
