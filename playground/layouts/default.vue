@@ -3,7 +3,7 @@ import { Modal } from '#components'
 </script>
 
 <template>
-  <div style="background: black;">
+  <div>
     <slot />
     <Modal />
   </div>

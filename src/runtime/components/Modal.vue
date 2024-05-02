@@ -1,44 +1,44 @@
 <script setup>
-import { watch, ref, defineAsyncComponent, onMounted, getCurrentInstance } from 'vue'
+import { watch, ref, defineAsyncComponent, onMounted, defineEmits } from 'vue'
 import { useNuxtApp } from '#imports'
+
+const emit = defineEmits(['modal:close'])
 
 const { $modal } = useNuxtApp()
 
-onMounted(() => {
-  $modal.setInstance(getCurrentInstance())
-})
-
 const modalContentComponentFilename = ref(null)
-const modalContentComponent = ref(null)
+const modalContentComponent = shallowRef(null)
 const isPreset = ref(false)
 const modalContainerClassModifier = ref(null)
 const modalContentComponentProps = ref({})
 
+onMounted(() => {
+  $modal.modalContentComponentFilename = modalContentComponentFilename
+  $modal.modalContentComponentProps = modalContentComponentProps
+  $modal.isPreset = isPreset
+})
+
 watch(modalContentComponentFilename, (name) => {
+
   if (name === null) {
     modalContentComponent.value = null
-    window.onscroll = function () {}
+    //window.onscroll = function () {}
     return
   }
 
   try {
+
     if (!isPreset.value) {
-      const dynamicComponent = defineAsyncComponent(async () => {
-        return new Promise((resolve) => {
-          resolve(`@/modals/${name}`)
-        })
-      })
+      const dynamicComponent = defineAsyncComponent( () => import(`@/modals/${name}.vue`))
 
-      console.log(dynamicComponent)
-
-      this.modalContainerClassModifier = dynamicComponent.default?.parentClassModifier
-      this.modalContentComponent = dynamicComponent.default
+      //modalContainerClassModifier.value = dynamicComponent.default?.parentClassModifier
+      modalContentComponent.value = dynamicComponent
 
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop
       const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
 
       window.onscroll = function () {
-        window.scrollTo(scrollLeft, scrollTop)
+        //window.scrollTo(scrollLeft, scrollTop)
       }
     }
   }
@@ -48,45 +48,47 @@ watch(modalContentComponentFilename, (name) => {
 })
 
 function onOverlayClick() {
-  this.modalContentComponentFilename = null
-  this.$emit('modal:close')
+  modalContentComponentFilename.value = null
+  emit('modal:close')
 }
 
 function onResolve(payload) {
-  this.modalContentComponentFilename = null
-  this.$emit('modal:close')
+  modalContentComponentFilename.value = null
+  emit('modal:close')
 
   this.resolve(payload)
 }
 
 function onReject(payload) {
-  this.modalContentComponentFilename = null
-  this.$emit('modal:close')
+  modalContentComponentFilename.value = null
+  emit('modal:close')
 
   this.reject(payload)
 }
 </script>
 
 <template>
-  <div
-    v-if="modalContentComponentFilename"
-    class="modal"
-  >
+  <teleport to="#teleports">
     <div
-      class="modal__overlay"
-      @click="onOverlayClick"
-    />
-    <div
-      :class="['modal__container', modalContainerClassModifier]"
-      @click.stop
+      v-if="modalContentComponentFilename"
+      class="modal"
     >
-      <component
-        :is="modalContentComponent"
-        :data="modalContentComponentProps"
-        @modal:close="onOverlayClick"
-        @modal:resolve="onResolve"
-        @modal:reject="onReject"
+      <div
+        class="modal__overlay"
+        @click="onOverlayClick"
       />
+      <div
+        :class="['modal__container', modalContainerClassModifier]"
+        @click.stop
+      >
+        <component
+          :is="modalContentComponent"
+          :data="modalContentComponentProps"
+          @modal:close="onOverlayClick"
+          @modal:resolve="onResolve"
+          @modal:reject="onReject"
+        />
+      </div>
     </div>
-  </div>
+  </teleport>
 </template>

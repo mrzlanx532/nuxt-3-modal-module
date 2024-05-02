@@ -7,13 +7,13 @@ definePageMeta({
   layout: 'default',
 })
 
-function openModal() {
-  $modal.load('ExampleModal.vue')
+async function openModal() {
+  await $modal.load('ExampleModal')
 }
 </script>
 
 <template>
-  <div @click="openModal">
-    Page 1
+  <div>
+    <button type="button" @click="openModal">Открыть модалку</button>
   </div>
 </template>
