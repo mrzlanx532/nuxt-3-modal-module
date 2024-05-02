@@ -1,3 +1,72 @@
+<script setup>
+import { watch, ref, defineAsyncComponent, onMounted, getCurrentInstance } from 'vue'
+import { useNuxtApp } from '#imports'
+
+const { $modal } = useNuxtApp()
+
+onMounted(() => {
+  $modal.setInstance(getCurrentInstance())
+})
+
+const modalContentComponentFilename = ref(null)
+const modalContentComponent = ref(null)
+const isPreset = ref(false)
+const modalContainerClassModifier = ref(null)
+const modalContentComponentProps = ref({})
+
+watch(modalContentComponentFilename, (name) => {
+  if (name === null) {
+    modalContentComponent.value = null
+    window.onscroll = function () {}
+    return
+  }
+
+  try {
+    if (!isPreset.value) {
+      const dynamicComponent = defineAsyncComponent(async () => {
+        return new Promise((resolve) => {
+          resolve(`@/modals/${name}`)
+        })
+      })
+
+      console.log(dynamicComponent)
+
+      this.modalContainerClassModifier = dynamicComponent.default?.parentClassModifier
+      this.modalContentComponent = dynamicComponent.default
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+
+      window.onscroll = function () {
+        window.scrollTo(scrollLeft, scrollTop)
+      }
+    }
+  }
+  catch (e) {
+    console.error(e)
+  }
+})
+
+function onOverlayClick() {
+  this.modalContentComponentFilename = null
+  this.$emit('modal:close')
+}
+
+function onResolve(payload) {
+  this.modalContentComponentFilename = null
+  this.$emit('modal:close')
+
+  this.resolve(payload)
+}
+
+function onReject(payload) {
+  this.modalContentComponentFilename = null
+  this.$emit('modal:close')
+
+  this.reject(payload)
+}
+</script>
+
 <template>
   <div
     v-if="modalContentComponentFilename"
@@ -21,63 +90,3 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'Modal',
-  data() {
-    return {
-      modalContainerClassModifier: null,
-      modalContentComponentFilename: null,
-      modalContentComponent: null,
-      modalContentComponentProps: {},
-      isPreset: false,
-    }
-  },
-  watch: {
-    modalContentComponentFilename: async function (name) {
-      if (name === null) {
-        this.modalContentComponent = null
-
-        window.onscroll = function () {}
-        return
-      }
-
-      try {
-        const dynamicComponent = this.isPreset ? await import(`@/plugins-from-lib/modal/presets/${name}`) : await import(`@/modals/${name}`)
-
-        this.modalContainerClassModifier = dynamicComponent.default?.parentClassModifier
-        this.modalContentComponent = dynamicComponent.default
-
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
-
-        window.onscroll = function () {
-          window.scrollTo(scrollLeft, scrollTop)
-        }
-      }
-      catch (e) {
-        console.error(`Не удалось найти модальное окно: "@/modals/${name}"`)
-      }
-    },
-  },
-  methods: {
-    onOverlayClick() {
-      this.modalContentComponentFilename = null
-      this.$emit('modal:close')
-    },
-    onResolve(payload) {
-      this.modalContentComponentFilename = null
-      this.$emit('modal:close')
-
-      this.resolve(payload)
-    },
-    onReject(payload) {
-      this.modalContentComponentFilename = null
-      this.$emit('modal:close')
-
-      this.reject(payload)
-    },
-  },
-}
-</script>

@@ -9,16 +9,7 @@ class ModalManager {
     this.instance = instance
   }
 
-  getComponentData() {
-    return {
-      extends: Modal,
-      created() {
-        Vue.prototype.$modal.setInstance(this)
-      },
-    }
-  }
-
-  #load(name, props = {}, isPreset = false) {
+  #load(name: string, props = {}, isPreset = false) {
     const promise = new Promise((resolve, reject) => {
       this.instance.resolve = resolve
       this.instance.reject = reject
@@ -35,7 +26,7 @@ class ModalManager {
     return this.#load('confirm', props, true)
   }
 
-  load(name, props = {}) {
+  load(name: string, props = {}) {
     return this.#load(name, props)
   }
 }
