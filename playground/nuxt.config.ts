@@ -3,6 +3,6 @@ export default defineNuxtConfig({
   modal: {},
   devtools: { enabled: true },
   css: [
-    './assets/css/app.scss',
+    './assets/css/app.css',
   ],
 })

@@ -8,8 +8,10 @@ export default defineNuxtModule<ModuleOptions>({
     configKey: 'modal',
   },
   defaults: {},
-  async setup(_options, _nuxt) {
+  async setup(_options, nuxt) {
     const resolver = createResolver(import.meta.url)
+
+    nuxt.options.css.push(resolver.resolve('./runtime/style.css'))
 
     await addComponent({
       name: 'Modal',

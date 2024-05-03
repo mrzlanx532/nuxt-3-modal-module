@@ -32,8 +32,8 @@ watch(modalContentComponentFilename, (name) => {
       modalContainerClassModifier.value = dynamicComponent?.parentClassModifier
       modalContentComponent.value = dynamicComponent
 
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+      const scrollTop = window.scrollY || document.documentElement.scrollTop
+      const scrollLeft = window.scrollX || document.documentElement.scrollLeft
 
       window.onscroll = function () {
         window.scrollTo(scrollLeft, scrollTop)

@@ -3,5 +3,3 @@ html, body, #__nuxt {
   height: 100%;
   margin: 0;
 }
-
-@import "modal";
