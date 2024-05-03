@@ -1,7 +1,7 @@
 {
   "name": "@mrzlanx532/nuxt-3-modal-module",
   "version": "0.0.1",
-  "description": "My new Nuxt module",
+  "description": "Modal nuxt 3 module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mrzlanx532/nuxt-3-modal-module.git"
