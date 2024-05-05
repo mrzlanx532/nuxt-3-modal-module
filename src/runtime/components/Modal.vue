@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, ref, defineAsyncComponent, onMounted, defineEmits, getCurrentInstance, shallowRef } from 'vue'
+import { watch, ref, defineAsyncComponent, onMounted, getCurrentInstance, shallowRef } from 'vue'
 import { useNuxtApp } from '#imports'
 
 const componentFilename = ref(null)
@@ -8,7 +8,7 @@ const isPreset = ref(false)
 const modalContainerClassModifier = ref(null)
 const componentProps = ref({})
 
-const { $modal } = useNuxtApp()
+const { $modal, runWithContext } = useNuxtApp()
 
 onMounted(() => {
   $modal.componentFilename = componentFilename
@@ -26,7 +26,13 @@ watch(componentFilename, (name) => {
   }
 
   try {
-    const dynamicComponent = defineAsyncComponent( () => isPreset.value ? import(`./presets/${name}.vue`) : import(`@/modals/${name}.vue`))
+    const dynamicComponent = defineAsyncComponent( () => {
+      if (isPreset.value) {
+        return import(`./presets/${name}.vue`)
+      }
+
+      return runWithContext(() => import(`@/modals/${name}.vue`))
+    })
 
     modalContainerClassModifier.value = dynamicComponent?.parentClassModifier
     component.value = dynamicComponent
