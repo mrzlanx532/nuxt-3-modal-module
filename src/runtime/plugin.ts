@@ -1,34 +1,40 @@
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin } from '#imports'
 
 class ModalManager {
-  public modalContentComponentFilename = null
-  public modalContentComponentProps = null
+  public componentFilename = null
+  public componentProps = null
   public isPreset = null
+  public instance = null
 
   #load(name: string, props = {}, isPreset = false) {
 
     const promise = new Promise((resolve, reject) => {
-      //this.instance.resolve = resolve
-      //this.instance.reject = reject
+
+      if (!this.instance) {
+        return
+      }
+
+      this.instance.resolve = resolve
+      this.instance.reject = reject
     })
 
     if (
-      this.modalContentComponentFilename === null ||
-      this.modalContentComponentProps === null ||
+      this.componentFilename === null ||
+      this.componentProps === null ||
       this.isPreset === null
     ) {
-      throw new Error()
+      throw new Error('Unexpected error')
     }
 
-    this.modalContentComponentFilename.value = name
-    this.modalContentComponentProps.value = props
+    this.componentFilename.value = name
+    this.componentProps.value = props
     this.isPreset.value = isPreset
 
     return promise
   }
 
   confirm(props = {}) {
-    return this.#load('confirm', props, true)
+    return this.#load('Confirm', props, true)
   }
 
   load(name: string, props = {}) {

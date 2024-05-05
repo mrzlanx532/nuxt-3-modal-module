@@ -1,43 +1,41 @@
-<script setup>
-import { watch, ref, defineAsyncComponent, onMounted, defineEmits } from 'vue'
+<script setup lang="ts">
+import { watch, ref, defineAsyncComponent, onMounted, defineEmits, getCurrentInstance, shallowRef } from 'vue'
 import { useNuxtApp } from '#imports'
 
-const modalContentComponentFilename = ref(null)
-const modalContentComponent = shallowRef(null)
+const componentFilename = ref(null)
+const component = shallowRef(null)
 const isPreset = ref(false)
 const modalContainerClassModifier = ref(null)
-const modalContentComponentProps = ref({})
+const componentProps = ref({})
 
 const { $modal } = useNuxtApp()
 
 onMounted(() => {
-  $modal.modalContentComponentFilename = modalContentComponentFilename
-  $modal.modalContentComponentProps = modalContentComponentProps
+  $modal.componentFilename = componentFilename
+  $modal.componentProps = componentProps
   $modal.isPreset = isPreset
+  $modal.instance = getCurrentInstance()
 })
 
-watch(modalContentComponentFilename, (name) => {
+watch(componentFilename, (name) => {
 
   if (name === null) {
-    modalContentComponent.value = null
+    component.value = null
     window.onscroll = function () {}
     return
   }
 
   try {
+    const dynamicComponent = defineAsyncComponent( () => isPreset.value ? import(`./presets/${name}.vue`) : import(`@/modals/${name}.vue`))
 
-    if (!isPreset.value) {
-      const dynamicComponent = defineAsyncComponent( () => import(`@/modals/${name}.vue`))
+    modalContainerClassModifier.value = dynamicComponent?.parentClassModifier
+    component.value = dynamicComponent
 
-      modalContainerClassModifier.value = dynamicComponent?.parentClassModifier
-      modalContentComponent.value = dynamicComponent
+    const scrollTop = window.scrollY || document.documentElement.scrollTop
+    const scrollLeft = window.scrollX || document.documentElement.scrollLeft
 
-      const scrollTop = window.scrollY || document.documentElement.scrollTop
-      const scrollLeft = window.scrollX || document.documentElement.scrollLeft
-
-      window.onscroll = function () {
-        window.scrollTo(scrollLeft, scrollTop)
-      }
+    window.onscroll = function () {
+      window.scrollTo(scrollLeft, scrollTop)
     }
   }
   catch (e) {
@@ -47,30 +45,31 @@ watch(modalContentComponentFilename, (name) => {
 
 const emit = defineEmits(['modal:close'])
 
-function onOverlayClick() {
-  modalContentComponentFilename.value = null
+const onOverlayClick = () => {
+  componentFilename.value = null
   emit('modal:close')
 }
 
-function onResolve(payload) {
-  modalContentComponentFilename.value = null
+const onResolve = (payload: unknown) => {
+
+  componentFilename.value = null
   emit('modal:close')
 
-  this.resolve(payload)
+  $modal.instance.resolve(payload)
 }
 
-function onReject(payload) {
-  modalContentComponentFilename.value = null
+const onReject = (payload: unknown) => {
+  componentFilename.value = null
   emit('modal:close')
 
-  this.reject(payload)
+  $modal.instance.reject(payload)
 }
 </script>
 
 <template>
   <teleport to="#teleports">
     <div
-      v-if="modalContentComponentFilename"
+      v-if="componentFilename"
       class="modal"
     >
       <div
@@ -82,8 +81,8 @@ function onReject(payload) {
         @click.stop
       >
         <component
-          :is="modalContentComponent"
-          :data="modalContentComponentProps"
+          :is="component"
+          :data="componentProps"
           @modal:close="onOverlayClick"
           @modal:resolve="onResolve"
           @modal:reject="onReject"
