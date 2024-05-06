@@ -8,7 +8,7 @@ const isPreset = ref(false)
 const modalContainerClassModifier = ref(null)
 const componentProps = ref({})
 
-const { $modal, runWithContext } = useNuxtApp()
+const { $modal } = useNuxtApp()
 
 onMounted(() => {
   $modal.componentFilename = componentFilename
@@ -74,26 +74,44 @@ const onReject = (payload: unknown) => {
 
 <template>
   <teleport to="#teleports">
-    <div
-      v-if="componentFilename"
-      class="modal"
-    >
+    <Transition>
       <div
-        class="modal__overlay"
-        @click="onOverlayClick"
-      />
-      <div
-        :class="['modal__container', modalContainerClassModifier]"
-        @click.stop
+        v-show="componentFilename"
+        class="modal"
       >
-        <component
-          :is="component"
-          :data="componentProps"
-          @modal:close="onOverlayClick"
-          @modal:resolve="onResolve"
-          @modal:reject="onReject"
+        <div
+          class="modal__overlay"
+          @click="onOverlayClick"
         />
+        <div
+          :class="['modal__container', modalContainerClassModifier]"
+          @click.stop
+        >
+          <component
+            :is="component"
+            :data="componentProps"
+            @modal:close="onOverlayClick"
+            @modal:resolve="onResolve"
+            @modal:reject="onReject"
+          />
+        </div>
       </div>
-    </div>
+    </Transition>
   </teleport>
 </template>
+
+<style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity .5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.v-leave-from {
+  opacity: 0.5;
+}
+</style>
