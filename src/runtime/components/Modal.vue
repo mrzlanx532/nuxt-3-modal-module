@@ -31,6 +31,9 @@ watch(componentFilename, (name) => {
         return import(`./presets/${name}.vue`)
       }
 
+      /** Для playground раскомментировать */
+      // return import(`@/modals/${name}.vue`)
+
       return import(`../../../../../../modals/${name}.vue`)
     })
 
@@ -74,15 +77,17 @@ const onReject = (payload: unknown) => {
 
 <template>
   <teleport to="#teleports">
-    <Transition>
       <div
-        v-show="componentFilename"
         class="modal"
+        :class="{'modal_active': componentFilename}"
       >
-        <div
-          class="modal__overlay"
-          @click="onOverlayClick"
-        />
+        <Transition>
+          <div
+            v-show="componentFilename"
+            class="modal__overlay"
+            @click="onOverlayClick"
+          />
+        </Transition>
         <div
           :class="['modal__container', modalContainerClassModifier]"
           @click.stop
@@ -96,7 +101,6 @@ const onReject = (payload: unknown) => {
           />
         </div>
       </div>
-    </Transition>
   </teleport>
 </template>
 
