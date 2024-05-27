@@ -88,10 +88,7 @@ const onReject = (payload: unknown) => {
             @click="onOverlayClick"
           />
         </Transition>
-        <div
-          :class="['modal__container', modalContainerClassModifier]"
-          @click.stop
-        >
+        <div :class="['modal__container', modalContainerClassModifier]">
           <component
             :is="component"
             :data="componentProps"
